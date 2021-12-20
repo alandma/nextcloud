@@ -1,0 +1,42 @@
+version: '3.7'
+services:
+  app:
+    image: nextcloud:21-fpm-alpine
+    env_file: .env/nc.env
+    restart: unless-stopped
+    volumes:
+      - app-vol:/var/www/html
+    depends_on: 
+      - banco
+  
+  # onlyoffice:
+  #   image: onlyoffice/documentserver:6.4
+  #   restart: unless-stopped
+  #   volumes:
+  #     - doc-vol:/var/www/onlyoffice/Data
+  
+  nginx:
+    image: nginx:1.20-alpine
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - app-vol:/var/www/html
+  
+  banco:
+    build:
+      context: ./postgresdb
+    restart: unless-stopped
+    env_file: .env/db.env
+    # ports: 
+    #   - "5432:5432"
+    volumes: 
+      - pgsql-vol:/var/lib/postgresql/data
+
+volumes:
+  # doc-vol:
+  app-vol:
+  mysql-vol:
+  pgsql-vol:
